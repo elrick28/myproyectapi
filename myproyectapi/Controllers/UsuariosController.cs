@@ -14,7 +14,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualBasic.CompilerServices;
+using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
 using myproyectapi.Models;
+using Newtonsoft.Json;
 
 namespace myproyectapi.Controllers
 {
@@ -28,7 +30,7 @@ namespace myproyectapi.Controllers
 
         public UsuariosController(myproyectdbContext context, IOptions<JWTSettings> jwtsettings)
         {
-            _context = context;
+            this._context = context;
             this._jwtsettings = jwtsettings.Value;
         }
         //GET: api/usuarios/login
@@ -40,8 +42,16 @@ namespace myproyectapi.Controllers
                 .FirstOrDefaultAsync();
             if (firstValidate == null)
             {
-                var mensaje = "Este usuario no existe.";
-                return NotFound(mensaje);
+                //var mensaje = "Este usuario no existe.";
+                var error = new ErrorJson
+                {
+                    StatusCode = 404,
+                    Message = "Este usuario no existe"
+                };
+
+                string json = JsonConvert.SerializeObject(error);
+
+                return NotFound(json);
             }
 
             usuario = await _context.Usuarios
@@ -50,16 +60,30 @@ namespace myproyectapi.Controllers
 
             if(usuario == null)
             {
-                var mensaje = "Contraseña incorrecta.";
-                return Unauthorized(mensaje);
+                var error = new ErrorJson
+                {
+                    StatusCode = 401,
+                    Message = "Contraseña incorrecta"
+                };
+
+                string json = JsonConvert.SerializeObject(error);
+
+                return Unauthorized(json);
             }
 
             UserWithToken userWithToken = new UserWithToken(usuario);
 
             if(userWithToken == null)
             {
-                var mensaje = "Este usuario no existe.";
-                return NotFound(mensaje);
+                var error = new ErrorJson
+                {
+                    StatusCode = 404,
+                    Message = "Este usuario no existe"
+                };
+
+                string json = JsonConvert.SerializeObject(error);
+
+                return NotFound(json);
             }
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtsettings.SecretKey);
@@ -144,7 +168,14 @@ namespace myproyectapi.Controllers
 
             if (userExist)
             {
-                return BadRequest(userExist);
+                var error = new ErrorJson
+                {
+                    StatusCode = 400,
+                    Message = "Este usuario ya se encuentra registrado"
+                };
+
+                string json = JsonConvert.SerializeObject(error);
+                return BadRequest(json);
             }
 
             _context.Usuarios.Add(usuarios);
@@ -160,7 +191,14 @@ namespace myproyectapi.Controllers
             var user = UsuarioEmailExists(email);
             if (!user)
             {
-                return NotFound();
+                var error = new ErrorJson
+                {
+                    StatusCode = 404,
+                    Message = "Este usuario no existe"
+                };
+
+                string json = JsonConvert.SerializeObject(error);
+                return NotFound(json);
             }
             return Ok();
         }
@@ -172,7 +210,14 @@ namespace myproyectapi.Controllers
             var usuario = await _context.Usuarios.FindAsync(id);
             if (usuario == null)
             {
-                return NotFound();
+                var error = new ErrorJson
+                {
+                    StatusCode = 404,
+                    Message = "Este usuario no existe"
+                };
+
+                string json = JsonConvert.SerializeObject(error);
+                return NotFound(json);
             }
 
             _context.Usuarios.Remove(usuario);

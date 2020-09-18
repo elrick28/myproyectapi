@@ -53,7 +53,9 @@ namespace myproyectapi.Controllers
 
             collection = collection.Where(vm => vm.UsuarioId == usuarioId);
 
-            if (collection == null) { return NotFound(); }
+            if (collection == null){
+                return NotFound();
+            }
             return Ok(collection.ToList());
         }
 
@@ -63,6 +65,14 @@ namespace myproyectapi.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutMaquinas(int id, Maquinas maquinas)
         {
+            if (maquinas == null)
+            {
+                return NoContent();
+            }
+            if (!ModelState.IsValid)
+            {
+                return BadRequest();
+            }
             if (id != maquinas.Id)
             {
                 return BadRequest();
@@ -82,7 +92,7 @@ namespace myproyectapi.Controllers
                 }
                 else
                 {
-                    throw;
+                    return BadRequest();
                 }
             }
 
