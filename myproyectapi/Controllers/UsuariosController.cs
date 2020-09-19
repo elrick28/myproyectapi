@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.VisualBasic.CompilerServices;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
+using myproyectapi.Common;
 using myproyectapi.Models;
 using Newtonsoft.Json;
 
@@ -53,9 +55,8 @@ namespace myproyectapi.Controllers
 
                 return NotFound(json);
             }
-
             usuario = await _context.Usuarios
-                .Where(u => u.Email==usuario.Email & u.Pass == usuario.Pass)
+                .Where(u => u.Email==usuario.Email & u.Pass == CommonMethods.ConvertToEncrypt(usuario.Pass))
                 .FirstOrDefaultAsync();
 
             if(usuario == null)
@@ -162,9 +163,9 @@ namespace myproyectapi.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<Usuarios>> PostUsuarios(Usuarios usuarios)
+        public async Task<ActionResult<Usuarios>> PostUsuarios(Usuarios usuario)
         {
-            var userExist = await _context.Usuarios.AnyAsync(user => user.Email == usuarios.Email);
+            var userExist = await _context.Usuarios.AnyAsync(user => user.Email == usuario.Email);
 
             if (userExist)
             {
@@ -177,13 +178,15 @@ namespace myproyectapi.Controllers
                 string json = JsonConvert.SerializeObject(error);
                 return BadRequest(json);
             }
-
-            _context.Usuarios.Add(usuarios);
+            string hashedPass = CommonMethods.ConvertToEncrypt(usuario.Pass);
+            usuario.Pass = hashedPass;
+            _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUsuarios", new { id = usuarios.Id }, usuarios);
+            return CreatedAtAction("GetUsuarios", new { id = usuario.Id }, usuario);
 
         }
+        
         // POST: api/usuarios/email
         [HttpPost("email")]
         public ActionResult<IEnumerable<Usuarios>> ValidarUsuario(string email)
@@ -232,6 +235,21 @@ namespace myproyectapi.Controllers
         private bool UsuariosExist(int id)
         {
             return _context.Usuarios.Any(e => e.Id == id);
+        }
+        public string HashearPassword(string Password)
+        {
+            byte[] salt = new byte[128 / 8];
+            using (var rng = RandomNumberGenerator.Create())
+            {
+                rng.GetBytes(salt);
+            }
+            string hashed = Convert.ToBase64String(KeyDerivation.Pbkdf2(
+            password: Password,
+            salt: salt,
+            prf: KeyDerivationPrf.HMACSHA1,
+            iterationCount: 10000,
+            numBytesRequested: 256 / 8));
+            return hashed;
         }
     }
 }
