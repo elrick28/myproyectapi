@@ -71,11 +71,18 @@ namespace myproyectapi.Controllers
             }
             if (!ModelState.IsValid)
             {
-                return BadRequest();
+                return BadRequest("El modelo no es valido.");
             }
             if (id != maquinas.Id)
             {
-                return BadRequest();
+                return BadRequest("Está maquina no existe");
+            }
+
+            var originalMachine = await _context.Maquinas.FindAsync(id);
+
+            if (originalMachine == maquinas)
+            {
+                return BadRequest("Sin modificaciones.");
             }
 
             _context.Entry(maquinas).State = EntityState.Modified;

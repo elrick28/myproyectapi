@@ -44,16 +44,8 @@ namespace myproyectapi.Controllers
                 .FirstOrDefaultAsync();
             if (firstValidate == null)
             {
-                //var mensaje = "Este usuario no existe.";
-                var error = new ErrorJson
-                {
-                    StatusCode = 404,
-                    Message = "Este usuario no existe"
-                };
-
-                string json = JsonConvert.SerializeObject(error);
-
-                return NotFound(json);
+                var mensaje = "Este usuario no existe.";
+                return NotFound(mensaje);
             }
             usuario = await _context.Usuarios
                 .Where(u => u.Email==usuario.Email & u.Pass == CommonMethods.ConvertToEncrypt(usuario.Pass))
@@ -61,30 +53,16 @@ namespace myproyectapi.Controllers
 
             if(usuario == null)
             {
-                var error = new ErrorJson
-                {
-                    StatusCode = 401,
-                    Message = "Contraseña incorrecta"
-                };
-
-                string json = JsonConvert.SerializeObject(error);
-
-                return Unauthorized(json);
+                var mensaje = "Contraseña incorrecta.";
+                return Unauthorized(mensaje);
             }
 
             UserWithToken userWithToken = new UserWithToken(usuario);
 
             if(userWithToken == null)
             {
-                var error = new ErrorJson
-                {
-                    StatusCode = 404,
-                    Message = "Este usuario no existe"
-                };
-
-                string json = JsonConvert.SerializeObject(error);
-
-                return NotFound(json);
+                var mensaje = "Este usuario no existe.";
+                return NotFound(mensaje);
             }
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_jwtsettings.SecretKey);
@@ -169,14 +147,8 @@ namespace myproyectapi.Controllers
 
             if (userExist)
             {
-                var error = new ErrorJson
-                {
-                    StatusCode = 400,
-                    Message = "Este usuario ya se encuentra registrado"
-                };
-
-                string json = JsonConvert.SerializeObject(error);
-                return BadRequest(json);
+                var mensaje = "Este usuario ya se encuentra registrado.";
+                return BadRequest(mensaje);
             }
             string hashedPass = CommonMethods.ConvertToEncrypt(usuario.Pass);
             usuario.Pass = hashedPass;
@@ -194,14 +166,8 @@ namespace myproyectapi.Controllers
             var user = UsuarioEmailExists(email);
             if (!user)
             {
-                var error = new ErrorJson
-                {
-                    StatusCode = 404,
-                    Message = "Este usuario no existe"
-                };
-
-                string json = JsonConvert.SerializeObject(error);
-                return NotFound(json);
+                var mensaje = "Este usuario no existe.";
+                return NotFound(mensaje);
             }
             return Ok();
         }
@@ -213,14 +179,8 @@ namespace myproyectapi.Controllers
             var usuario = await _context.Usuarios.FindAsync(id);
             if (usuario == null)
             {
-                var error = new ErrorJson
-                {
-                    StatusCode = 404,
-                    Message = "Este usuario no existe"
-                };
-
-                string json = JsonConvert.SerializeObject(error);
-                return NotFound(json);
+                var mensaje = "Este usuario no existe.";
+                return NotFound(mensaje);
             }
 
             _context.Usuarios.Remove(usuario);
