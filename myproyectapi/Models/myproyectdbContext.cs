@@ -22,7 +22,7 @@ namespace myproyectapi.Models
         {
             if (!optionsBuilder.IsConfigured)
             {
-//#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
                 optionsBuilder.UseMySql("server=localhost;port=3306;user=root;password=1234;database=myproyectdb", x => x.ServerVersion("8.0.21-mysql"));
             }
         }
@@ -77,9 +77,7 @@ namespace myproyectapi.Models
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
 
-                entity.Property(e => e.State)
-                    .HasColumnName("state")
-                    .HasDefaultValueSql("'0'");
+                entity.Property(e => e.State).HasColumnName("state");
 
                 entity.Property(e => e.Url)
                     .IsRequired()
@@ -139,6 +137,14 @@ namespace myproyectapi.Models
                     .IsRequired()
                     .HasColumnName("pass")
                     .HasColumnType("varchar(45)")
+                    .HasCharSet("utf8mb4")
+                    .HasCollation("utf8mb4_0900_ai_ci");
+
+                entity.Property(e => e.Rol)
+                    .IsRequired()
+                    .HasColumnName("rol")
+                    .HasColumnType("varchar(45)")
+                    .HasDefaultValueSql("'admin'")
                     .HasCharSet("utf8mb4")
                     .HasCollation("utf8mb4_0900_ai_ci");
             });

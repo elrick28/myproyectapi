@@ -15,8 +15,8 @@ namespace myproyectapi.Models
         public string UsuarioRdp { get; set; }
         public string PassRdp { get; set; }
         public int UsuarioId { get; set; }
-        public sbyte? State { get; set; }
-        public int? Port { get; set; }
+        public sbyte State { get; set; }
+        public int Port { get; set; }
 
         public virtual Usuarios Usuario { get; set; }
     }

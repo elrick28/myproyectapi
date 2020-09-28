@@ -73,6 +73,7 @@ namespace myproyectapi.Controllers
                     new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
                     new Claim(ClaimTypes.Name, usuario.Nombre),
                     new Claim(ClaimTypes.Email, usuario.Email),
+                    new Claim(ClaimTypes.Role, usuario.Rol),
 
                 }),
                 Expires = DateTime.UtcNow.AddDays(2),
